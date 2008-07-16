@@ -1,0 +1,10 @@
+$Id: CHANGELOG,v 1.1.2.1 2008/05/03 20:11:08 professorbikeybike Exp $
+
+DRUPAL-6, 2008-05-03
+--------------------
+- Added a style sheet to remove default Drupal styling of tbody
+  elements
+- Added a lootz.css style sheet to add item quality colors (uncommon,
+  rare and epic)
+- Added a lootz_hook_quality_lookup() for checking the quality of
+  items

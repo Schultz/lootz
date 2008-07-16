@@ -1,0 +1,12 @@
+name = Lootz
+description = Allow the use of [item][/item] tags in your posts. The item is automatically looked up on the installed item db (currently only WOW DB is packaged, but others are easy to create.
+core = 6.x
+category = MMORPG
+
+
+; Information added by drupal.org packaging script on 2008-05-04
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "lootz"
+datestamp = "1209859809"
+

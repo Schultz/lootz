@@ -1,0 +1,20 @@
+/* $Id */
+
+a.lootz { 
+  font-weight: bold;
+}
+a.lootz:hover { 
+  text-decoration: underline;
+}
+
+a span.lootz-epic, a span.lootz-epic:hover { 
+  color: #a335ee;
+}
+
+a span.lootz-rare, a span.lootz-rare:hover {
+  color:  #0070dd;
+}
+
+a span.lootz-uncommon, a span.lootz-uncommon:hover {
+  color: #00ca00;
+}

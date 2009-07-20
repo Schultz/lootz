@@ -39,24 +39,25 @@ function lootz_wowhead_filter_tips() {
 function lootz_wowhead_id_lookup($name) {
   $name = ucwords($name);
   $url = WOWHEAD_BASE_URL . '/' . WOWHEAD_SEARCH_NAME . drupal_urlencode($name);
-  $page = file_get_contents($url);
+  $page = drupal_http_request($url);
 
-  // Check to see if it's a search page.
-  if (preg_match('/<h1>Search results for/', $page, $m)) {
-    // Find the id of an exact match, or a match with escaped quotes.
-    $escaped = preg_quote(addslashes($name));
-    $pattern = "/\[([0-9]+)\]=\{name_enus\:'(" . $name . "|" . $escaped . ")'/i";
-    if (preg_match($pattern, $page, $m)) {
-      return check_plain($m[1]);
+  if ($page->code == '200') {
+    // Check to see if it's a search page.
+    if (preg_match('/<h1>Search results for/', $page->data, $m)) {
+      // Find the id of an exact match, or a match with escaped quotes.
+      $escaped = preg_quote(addslashes($name));
+      $pattern = "/\[([0-9]+)\]=\{name_enus\:'(" . $name . "|" . $escaped . ")'/i";
+      if (preg_match($pattern, $page->data, $m)) {
+        return check_plain($m[1]);
+      }
+    }
+    else {
+      // You're on the right page already!
+      if (preg_match('/typeId: ([0-9]+)/', $page->data, $m)) {
+        return check_plain($m[1]);
+      }
     }
   }
-  else {
-    // You're on the right page already!
-    if (preg_match('/typeId: ([0-9]+)/', $page, $m)) {
-      return check_plain($m[1]);
-    }
-  }
-  
   return FALSE;
 }
 
@@ -66,12 +67,14 @@ function lootz_wowhead_id_lookup($name) {
 function lootz_wowhead_name_lookup($id) {
   // Grab search results.
   $url = WOWHEAD_BASE_URL . '/' . WOWHEAD_SEARCH_ID . $id;
-  $page = file_get_contents($url);
-  // Search for the name which is next to the id 4677, name: 'Veteran Cloak'.
-  if (preg_match("/" .$id . ", name: '(.*)'/", $page, $m)) {
-    return check_plain($m[1]);
+  $page = drupal_http_request($url);
+
+  if($page->code == '200') {
+    // Search for the name which is next to the id 4677, name: 'Veteran Cloak'.
+    if (preg_match("/" .$id . ", name: '(.*)'/", $page->data, $m)) {
+      return check_plain($m[1]);
+    }
   }
-  
   return $id;
 }
 
@@ -82,46 +85,46 @@ function lootz_wowhead_quality_lookup($id, $name) {
   // Pattern: <b class=q4>Earthwarden</b>
   $url = WOWHEAD_BASE_URL . '/' . WOWHEAD_SEARCH_ID . $id;
   if ($url!="http://www.wowhead.com/?item=") {
-    $page = file_get_contents($url);
-    if (preg_match('/<b class="?(q[0-9]{1})"?>/', $page, $m)) {
-      switch ($m[1]) {
-        case 'q1' :
-          // q1: common
-          $quality = 'common';
-          break;
-        case 'q2' :
-          // q2: uncommon
-          $quality = 'uncommon';
-          break;
-        case 'q3' :
-          // q3: rare
-          $quality = 'rare';
-          break;
-        case 'q4' :
-          // q4: epic
-          $quality = 'epic';
-          break;
-        case 'q5' :
-          // q5: legendary
-          $quality = 'legendary';
-          break;
-        case 'q6' :
-          // q6: artifact?
-          $quality = 'artifact';
-          break;
-        case 'q7' :
-          // q7: bind to account
-          $quality = 'bind_to_account';
-          break;
-        default:
-          $quality = FALSE;
+	$page = drupal_http_request($url);
+    $quality = FALSE;
+    if($page->code == '200') {
+      if (preg_match('/<b class="?(q[0-9]{1})"?>/', $page->data, $m)) {
+        switch ($m[1]) {
+          case 'q1' :
+            // q1: common
+            $quality = 'common';
+            break;
+          case 'q2' :
+            // q2: uncommon
+            $quality = 'uncommon';
+            break;
+          case 'q3' :
+            // q3: rare
+            $quality = 'rare';
+            break;
+          case 'q4' :
+            // q4: epic
+            $quality = 'epic';
+            break;
+          case 'q5' :
+            // q5: legendary
+            $quality = 'legendary';
+            break;
+          case 'q6' :
+            // q6: artifact?
+            $quality = 'artifact';
+            break;
+          case 'q7' :
+            // q7: bind to account
+            $quality = 'bind_to_account';
+            break;
+        }
       }
     }
-  
     return $quality;
   }
   else {
-    returN FALSE;
+    return FALSE;
   }
 }
 

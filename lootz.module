@@ -1,19 +1,19 @@
 <?php
 
-// $Id: lootz.module,v 1.1.2.1 2008/05/03 20:11:08 professorbikeybike Exp $
+// $Id: lootz.module,v 1.1.2.2 2009/05/22 20:25:29 professorbikeybike Exp $
 
 /**
  * @file
- *   Allow the use of [item] filters. The item databases are 
- *   configured in the item_dbs directory. See item_dbs/wowdb.inc
- *   for an example.
+ *   Allow the use of [item] filters. The item databases are configured in the
+ *   item_dbs directory. See item_dbs/wowdb.inc or item_dbs/wowhead.inc for an
+ *   example.
  *
  * @todo
- *   Add more (eg, wowhead, thottbot, etc)
+ *   Add more (eg, thottbot, etc)
  */
 
 /**
- * Implementation of hook_filter()
+ * Implementation of hook_filter().
  */
 function lootz_filter($op, $delta = 0, $format = -1, $text = '') {
   switch ($op) {
@@ -25,37 +25,39 @@ function lootz_filter($op, $delta = 0, $format = -1, $text = '') {
 
     case 'prepare' :
       return $text;
+
     case 'process':
       return _lootz_filter_process($text, $format);
+
     case 'settings' :
-      return _lootz_filter_settings();
+      return _lootz_filter_settings($format);
   }
 }
 
 /**
- * Implementation of hook_filter_tips()
+ * Implementation of hook_filter_tips().
  */
 function lootz_filter_tips($delta, $format, $long) {
   return _lootz_invoke_hook('filter_tips', $delta, $format, $long);
 }
 
 /**
- * Implementation of hook_theme()
+ * Implementation of hook_theme().
  */
 function lootz_theme() {
   $hooks['lootz_link_item'] = array(
-    'arguments' => array('url' => '', 'name' => '', 'id' => ''),
+    'arguments' => array('url' => NULL, 'name' => NULL, 'id' => NULL),
   );
   return $hooks;
 }
 
 
 /**
- * Replace [item] tags with corresponding values, if found
+ * Replace [item] tags with corresponding values, if found.
  */
 function _lootz_filter_process($text, $format) {
-  // find all links
-  if (preg_match_all('#\[item\]([0-9a-zA-Z ]+)\[/item\]#',$text, $links, PREG_SET_ORDER)) {
+  // Find all links.
+  if (preg_match_all('#\[item\]([0-9a-zA-Z-\'-\- ]+)\[/item\]#',$text, $links, PREG_SET_ORDER)) {
     foreach ($links as $match) {
       if ($new_link = _lootz_link_item($match[1])) {
         $text = str_replace($match[0], $new_link, $text);
@@ -66,11 +68,11 @@ function _lootz_filter_process($text, $format) {
 }
 
 /**
- * Implementation of hook_init()
+ * Implementation of hook_init().
  */
 function lootz_init() {
   _lootz_invoke_hook('init');
-  $vendor = variable_get('lootz_item_database', 'wowdb');
+  $vendor = variable_get('lootz_item_database', 'wowhead');
   $css = drupal_get_path('module', 'lootz') . '/item_dbs/' . $vendor . '.css';
   if (is_readable($css)) {
     drupal_add_css($css);
@@ -79,16 +81,18 @@ function lootz_init() {
 }
 
 /**
- * @param id string|int   Item ID or Name
- * @return string         Link to item in configured item db
+ * @param string $id
+ *   Item ID or Name.
+ * @return string
+ *   Link to item in configured item DB.
  */
 function _lootz_link_item($id) {
   if (is_numeric($id)) {
-    // find the name
+    // Find the name.
     $name = _lootz_name_lookup($id);
   }
   else {
-    // find id
+    // Find id.
     $name = $id;
     $id = _lootz_id_lookup($id);
   }
@@ -96,9 +100,11 @@ function _lootz_link_item($id) {
 }
 
 /**
- * Find an item name based on ID
- * @param id int   Item ID
- * @return string  Item name
+ * Find an item name based on ID.
+ * @param int $id
+ *   Item ID
+ * @return string
+ *   Item name
  */
 function _lootz_name_lookup($id) {
   static $names = array();
@@ -126,8 +132,10 @@ function _lootz_id_lookup($name) {
   }
 
   if (!isset($ids[$name])) {
-    $ids[$name] = _lootz_invoke_hook('id_lookup', $name);
-    _lootz_cache_set('ids', $ids);
+    if ($id = _lootz_invoke_hook('id_lookup', $name)) {
+      $ids[$name] = $id;
+      _lootz_cache_set('ids', $ids);
+    }
   }
 
   return $ids[$name];
@@ -140,8 +148,8 @@ function _lootz_invoke_hook() {
   $args = func_get_args();
   $hook = array_shift($args);
 
-  // determine which vendor to use (default is wowdb)
-  $vendor = variable_get('lootz_item_database', 'wowdb');
+  // Determine which vendor to use (default is wowhead).
+  $vendor = variable_get('lootz_item_database', 'wowhead');
   require_once 'item_dbs/' . $vendor .'.inc';
 
   $function = 'lootz_' . $vendor . '_' . $hook;
@@ -152,7 +160,7 @@ function _lootz_invoke_hook() {
 }
 
 /**
- * Load lootz cache
+ * Load lootz cache.
  */
 function _lootz_cache_get($cid) {
   $cache = cache_get('lootz_' . $cid);
@@ -163,19 +171,18 @@ function _lootz_cache_get($cid) {
 }
 
 /**
- * Store lootz cache
+ * Store lootz cache.
  */
 function _lootz_cache_set($cid, $value) {
-  cache_set('lootz_' . $cid, $value, 'cache', CACHE_TEMPORARY);
+  cache_set('lootz_' . $cid, $value, 'cache', CACHE_PERMANENT);
 }
 
 /**
- * Return settings form
+ * Return settings form.
  */
-function _lootz_filter_settings() {
+function _lootz_filter_settings($format) {
   $form['lootz'] = array(
     '#type' => 'fieldset',
-    '#tree' => TRUE,
     '#title' => t('Lootz Settings'),
     '#collapsible' => TRUE,
   );
@@ -183,24 +190,24 @@ function _lootz_filter_settings() {
     '#type' => 'radios',
     '#title' => t('Item Database'),
     '#options' => _lootz_get_available_item_dbs(),
-    '#default_value' => variable_get('lootz_item_database', 'wowdb'),
+    '#default_value' => variable_get('lootz_item_database', 'wowhead'),
     '#description' => t('The item lookup database to use'),
   );
   return $form;
 }
 
 /**
- * Get all available item dbs (as configured in item_dbs directory)
+ * Get all available item dbs (as configured in item_dbs directory).
  */
 function _lootz_get_available_item_dbs() {
-  // include all files
+  // Include all files.
   $dir = drupal_get_path('module', 'lootz') . '/item_dbs';
   $available_item_dbs = file_scan_directory($dir, '\.inc$');
  
   $item_dbs = array();
   foreach (array_keys($available_item_dbs) as $file) {
     if (preg_match('#/([a-z]*)\.inc$#', $file, $m)) {
-      // this is the name, eg wowhead, wowdb
+      // This is the name, eg wowhead, wowdb.
       $item_db = $m[1];
 
       include_once $file;

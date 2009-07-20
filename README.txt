@@ -1,4 +1,4 @@
-$Id: README.txt,v 1.1.2.2 2008/05/02 22:30:18 professorbikeybike Exp $
+$Id: README.txt,v 1.1.2.3 2009/05/22 20:25:29 professorbikeybike Exp $
 
 The Lootz Item Filter
 ---------------------
@@ -20,6 +20,8 @@ The module is designed as a filter engine, so if somebody wants to use
 Wowhead or Thottbot instead of WoW DB, they simply need to copy the
 wowdb.inc file, and modify the hooks to work for the desired item
 database.
+
+WowHead support added by andy68man (http://drupal.org/user/471708).
 
 This module is still under heavy development. More soon!
 

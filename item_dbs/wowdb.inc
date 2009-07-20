@@ -1,6 +1,6 @@
 <?php
 
-// $Id: wowdb.inc,v 1.1.2.1 2008/05/03 20:11:08 professorbikeybike Exp $
+// $Id: wowdb.inc,v 1.1.2.2 2009/05/22 20:25:29 professorbikeybike Exp $
 
 /**
  * @file

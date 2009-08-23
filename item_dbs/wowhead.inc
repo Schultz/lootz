@@ -58,6 +58,14 @@ function lootz_wowhead_id_lookup($name) {
       }
     }
   }
+  else if ($page->code == '302') {
+	// WoW Head issues a 302 redirect when only 1 item is found. So check the 302.
+	// WoW Head issues only relative location header and drupal http request requires a schema hence we just
+	// use the $page->redirect_url to find out which item its redirecting to.
+	if (preg_match('/item=([0-9]+)/', $page->redirect_url, $m)) {
+		return check_plain($m[1]);
+	}
+  }
   return FALSE;
 }
 
